@@ -1,0 +1,40 @@
+{
+  "predictions": [
+    {
+      "image_path": "dataset/batch_test/00000004_resized.jpg",
+      "label": "Bishop",
+      "label_id": 0,
+      "confidence": 0.643805205821991
+    },
+    {
+      "image_path": "dataset/batch_test/00000002_resized.jpg",
+      "label": "Bishop",
+      "label_id": 0,
+      "confidence": 0.8252506852149963
+    },
+    {
+      "image_path": "dataset/batch_test/00000000_resized.jpg",
+      "label": "Bishop",
+      "label_id": 0,
+      "confidence": 0.9819677472114563
+    },
+    {
+      "image_path": "dataset/batch_test/00000005_resized.jpg",
+      "label": "Bishop",
+      "label_id": 0,
+      "confidence": 0.9103295207023621
+    },
+    {
+      "image_path": "dataset/batch_test/00000003_resized.jpg",
+      "label": "Rook",
+      "label_id": 4,
+      "confidence": 0.9896161556243896
+    }
+  ],
+  "metadata": {
+    "total_images": 5,
+    "successful_predictions": 5,
+    "batch_size": 32,
+    "confidence_threshold": 0.5
+  }
+}

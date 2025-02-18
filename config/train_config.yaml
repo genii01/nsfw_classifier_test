@@ -4,14 +4,15 @@ data:
   img_size: 224
   batch_size: 32
   num_workers: 4
+  train_split_frac: 0.8
 
 model:
-  name: "mobilenet_v3_small"
+  name: "mobilenet_v3_small" # "mobilenet_v3_small" or "mobilenet_v3_large"
   num_classes: 5
   pretrained: true
 
 training:
-  epochs: 50
+  epochs: 2
   learning_rate: 0.001
   weight_decay: 0.0001
   early_stopping_patience: 5

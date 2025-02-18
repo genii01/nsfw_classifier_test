@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 import pandas as pd
 from omegaconf import OmegaConf
 from pathlib import Path
@@ -31,8 +32,8 @@ class DLTrainer:
         train_transform = ChessTransforms(self.config, is_train=True)
         val_transform = ChessTransforms(self.config, is_train=False)
 
-        # Split data
-        train_df = df.sample(frac=0.8, random_state=42)
+        # Split data using config value
+        train_df = df.sample(frac=self.config.data.train_split_frac, random_state=42)
         val_df = df.drop(train_df.index)
 
         # Create datasets
@@ -44,14 +45,14 @@ class DLTrainer:
             train_dataset,
             batch_size=self.config.data.batch_size,
             shuffle=True,
-            num_workers=self.config.data.num_workers
+            num_workers=self.config.data.num_workers,
         )
 
         self.val_loader = DataLoader(
             val_dataset,
             batch_size=self.config.data.batch_size,
             shuffle=False,
-            num_workers=self.config.data.num_workers
+            num_workers=self.config.data.num_workers,
         )
 
     def setup_model(self):
@@ -62,7 +63,7 @@ class DLTrainer:
         self.optimizer = optim.Adam(
             self.model.parameters(),
             lr=self.config.training.learning_rate,
-            weight_decay=self.config.training.weight_decay
+            weight_decay=self.config.training.weight_decay,
         )
 
     def train_epoch(self):
@@ -71,7 +72,8 @@ class DLTrainer:
         correct = 0
         total = 0
 
-        for images, labels in self.train_loader:
+        pbar = tqdm(self.train_loader, desc="Training")
+        for images, labels in pbar:
             images, labels = images.to(self.device), labels.to(self.device)
 
             self.optimizer.zero_grad()
@@ -86,7 +88,10 @@ class DLTrainer:
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
 
-        return total_loss / len(self.train_loader), 100. * correct / total
+            # Update progress bar
+            pbar.set_postfix({"loss": f"{loss.item():.4f}"})
+
+        return total_loss / len(self.train_loader), 100.0 * correct / total
 
     def validate(self):
         self.model.eval()
@@ -95,7 +100,8 @@ class DLTrainer:
         total = 0
 
         with torch.no_grad():
-            for images, labels in self.val_loader:
+            pbar = tqdm(self.val_loader, desc="Validating")
+            for images, labels in pbar:
                 images, labels = images.to(self.device), labels.to(self.device)
 
                 outputs = self.model(images)
@@ -106,13 +112,15 @@ class DLTrainer:
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
 
-        accuracy = 100. * correct / total
+                # Update progress bar
+                pbar.set_postfix({"loss": f"{loss.item():.4f}"})
+
+        accuracy = 100.0 * correct / total
 
         # Save best model
         if accuracy > self.best_val_acc:
             self.best_val_acc = accuracy
-            torch.save(self.model.state_dict(),
-                       self.save_dir / "best_model.pth")
+            torch.save(self.model.state_dict(), self.save_dir / "best_model.pth")
             self.patience_counter = 0
         else:
             self.patience_counter += 1
@@ -142,7 +150,7 @@ class DLTrainer:
 
 def main():
     # Load config using OmegaConf
-    config = OmegaConf.load('config/train_config.yaml')
+    config = OmegaConf.load("config/train_config.yaml")
 
     # Create trainer and start training
     trainer = DLTrainer(config)

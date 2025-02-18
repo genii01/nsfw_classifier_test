@@ -1,0 +1,16 @@
+{
+  "labels": {
+    "Bishop": 0,
+    "Rook": 4,
+    "Pawn": 2,
+    "Knight": 1,
+    "Queen": 3
+  },
+  "id2label": {
+    "0": "Bishop",
+    "4": "Rook",
+    "2": "Pawn",
+    "1": "Knight",
+    "3": "Queen"
+  }
+}
